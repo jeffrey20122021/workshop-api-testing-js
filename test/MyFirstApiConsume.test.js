@@ -6,6 +6,11 @@ const data = {
     age: '31',
     city: 'New York'
 };
+const query = {
+    name: 'J',
+    age: '25',
+    city: 'New York'
+};
 
 describe('First Api Tests', () => {
     it('Consume GET Service', async () => {
@@ -15,10 +20,10 @@ describe('First Api Tests', () => {
         expect(response.data).to.have.property('origin');
     });
     it('Consume GET Service with query parameters', async () => {
-        const response = await axios.get('https://httpbin.org/get', data);
+        const response = await axios.get('https://httpbin.org/get', { query });
 
         expect(response.status).to.equal(StatusCodes.OK);
-        expect(response.config.query).to.eql(data);
+        expect(response.config.query).to.eql(query);
     });
     it('Consume HEAD Service', async () => {
         const response = await axios.head('https://httpbin.org/headers');
@@ -31,13 +36,13 @@ describe('First Api Tests', () => {
 
         expect(response.status).to.equal(StatusCodes.OK);
         expect(response.data.data).to.eql(JSON.stringify(data));
-        expect(response.data.json).to.eql(query);
+        expect(response.data.json).to.eql(data);
     });
     it('Consume PUT Service', async () => {
         const response = await axios.put("https://httpbin.org/put", data);
 
         expect(response.status).to.equal(StatusCodes.OK);
-        expect(response.data.json).to.eql(query);
+        expect(response.data.json).to.eql(data);
     });
     it('Consume DELETE Service', async () => {
         const response = await axios.delete("https://httpbin.org/delete");
