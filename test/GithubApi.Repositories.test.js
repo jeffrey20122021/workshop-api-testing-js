@@ -1,108 +1,116 @@
 const axios = require('axios');
-const { expect } = require('chai');
-const { StatusCodes } = require('http-status-codes');
+const chai = require('chai');
 const md5 = require('md5');
 
-const chai = require('chai');
-const chaiSubset = require('chai-subset');
+chai.use(require('chai-subset'));
 
-chai.use(chaiSubset);
+const { expect, assert } = chai;
 
-const path = 'https://api.github.com/users/aperdomob';
+const urlBase = 'https://api.github.com';
 
-const user = {
-  name: 'Alejandro Perdomo',
-  company: 'Perficient Latam',
-  location: 'Colombia'
-};
+describe('Given a user logged in github', () => {
+  const username = 'aperdomob';
 
-const jasmineRepository = {
-  fullName: 'aperdomob/jasmine-json-report',
-  private: false,
-  description: 'A Simple Jasmine JSON Report'
-};
+  describe(`when get ${username} user`, () => {
+    let user;
 
-const readme = {
-  name: 'README.md',
-  path: 'README.md',
-  sha: '360eee6c223cee31e2a59632a2bb9e710a52cdc0'
-};
-
-let jasmineReportRepository;
-let md5downloaded;
-let readmeData;
-let md5downloadedReadme;
-
-let serviceHypermedia;
-let repositories;
-let downloadedRepo;
-let repositoryContent;
-let downloadedReadme;
-
-describe('GET methods', () => {
-  before(async () => {
-    serviceHypermedia = await axios.get(`${path}`);
-  });
-
-  it('User verification', () => {
-    expect(serviceHypermedia.status).to.equal(StatusCodes.OK);
-    expect(serviceHypermedia.data.name).to.equal(user.name);
-    expect(serviceHypermedia.data.company).to.equal(user.company);
-    expect(serviceHypermedia.data.location).to.equal(user.location);
-  });
-
-  describe('Hypermedia methods', () => {
     before(async () => {
-      repositories = await axios.get(`${path}/repos`);
-      const repositoriesData = repositories.data;
-      jasmineReportRepository = repositoriesData.find(({ name }) => name === 'jasmine-json-report');
+      const userQueryResponse = await axios.get(`${urlBase}/users/${username}`, {
+        headers: {
+          Authorization: `token ${process.env.ACCESS_TOKEN}`
+        }
+      });
+
+      user = userQueryResponse.data;
     });
 
-    it('Repository Content Verification', () => {
-      expect(repositories.status).to.equal(StatusCodes.OK);
-      expect(jasmineReportRepository.full_name).to.equal(jasmineRepository.fullName);
-      expect(jasmineReportRepository.private).to.equal(jasmineRepository.private);
-      expect(jasmineReportRepository.description).to.equal(jasmineRepository.description);
+    it('then the user should be loaded', () => {
+      expect(user.name).to.equal('Alejandro Perdomo');
+      expect(user.company).to.equal('Perficient Latam');
+      expect(user.location).to.equal('Colombia');
     });
 
-    describe('Service archive_url', () => {
+    describe('when get his repositories', () => {
+      let repositories;
+      let repository;
+      const expectedRepository = 'jasmine-json-report';
+
       before(async () => {
-        const jasmineRepo = jasmineReportRepository.archive_url;
-        const result = jasmineRepo.replace('{archive_format}{/ref}', 'zipball');
-        downloadedRepo = await axios.get(`${result}`);
-        md5downloaded = md5(downloadedRepo.data);
-      });
-
-      it('Verify repository download', () => {
-        expect(downloadedRepo.status).to.equal(StatusCodes.OK);
-        expect(md5downloaded).to.equal('408fe7c00b0f184a0c2bd5bdf4cff55e');
-      });
-    });
-
-    describe('Service url', () => {
-      before(async () => {
-        repositoryContent = await axios.get(`${jasmineReportRepository.url}/contents/`);
-        readmeData = repositoryContent.data.find(({ name }) => name === 'README.md');
-      });
-
-      it('Verify the content of the README.md', () => {
-        expect(repositoryContent.status).to.equal(StatusCodes.OK);
-        expect(readmeData).to.containSubset({
-          name: readme.name,
-          path: readme.path,
-          sha: readme.sha
+        const repositoriesQueryResponse = await axios.get(user.repos_url, {
+          headers: {
+            Authorization: `token ${process.env.ACCESS_TOKEN}`
+          }
         });
+
+        repositories = repositoriesQueryResponse.data;
+        repository = repositories.find((repo) => repo.name === expectedRepository);
       });
 
-      describe('Method to download the readme', () => {
+      it(`then should have ${expectedRepository} repository`, () => {
+        assert.exists(repository);
+        expect(repository.full_name).to.equal('aperdomob/jasmine-json-report');
+        expect(repository.private).to.equal(false);
+        expect(repository.description).to.equal('A Simple Jasmine JSON Report');
+      });
+
+      describe('when download main branch', () => {
+        const noExpectedMd5 = 'd41d8cd98f00b204e9800998ecf8427e';
+        let zip;
+
         before(async () => {
-          downloadedReadme = await axios.get(`${readmeData.download_url}`);
-          md5downloadedReadme = md5(downloadedReadme.data);
+          const downloadQueryResponse = await axios
+            .get(`${repository.svn_url}/archive/${repository.default_branch}.zip`, {
+              headers: {
+                Authorization: `token ${process.env.ACCESS_TOKEN}`
+              }
+            });
+          zip = downloadQueryResponse.data;
         });
 
-        it('Verify readme download', () => {
-          expect(downloadedReadme.status).to.equal(StatusCodes.OK);
-          expect(md5downloadedReadme).to.equal('497eb689648cbbda472b16baaee45731');
+        it('then the repository should be downloaded', () => {
+          expect(md5(zip)).to.not.equal(noExpectedMd5);
+        });
+      });
+
+      describe('when get path file list', () => {
+        const format = {
+          name: 'README.md',
+          path: 'README.md',
+          sha: '360eee6c223cee31e2a59632a2bb9e710a52cdc0'
+        };
+
+        let files;
+        let readme;
+
+        before(async () => {
+          const readmeFileQueryResponse = await axios
+            .get(`${repository.url}/contents`, {
+              headers: {
+                Authorization: `token ${process.env.ACCESS_TOKEN}`
+              }
+            });
+
+          files = readmeFileQueryResponse.data;
+          readme = files.find((file) => file.name === 'README.md');
+        });
+
+        it('then should have README.md file', () => {
+          assert.exists(readme);
+          expect(readme).containSubset(format);
+        });
+
+        describe('when get the file content', () => {
+          const expectedMd5 = '497eb689648cbbda472b16baaee45731';
+          let fileContent;
+
+          before(async () => {
+            const downloadReadmeQuery = await axios.get(readme.download_url);
+            fileContent = downloadReadmeQuery.data;
+          });
+
+          it('then the file should be downloaded', () => {
+            expect(md5(fileContent)).to.equal(expectedMd5);
+          });
         });
       });
     });
