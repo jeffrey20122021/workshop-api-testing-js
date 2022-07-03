@@ -1,10 +1,6 @@
 const axios = require('axios');
-const chai = require('chai');
-const md5 = require('md5');
-
-chai.use(require('chai-subset'));
-
-const { expect, assert } = chai;
+const { expect, assert } = require('chai');
+const { StatusCodes } = require('chai');
 
 const urlBase = 'https://api.github.com';
 
@@ -115,4 +111,4 @@ describe('Given a user logged in github', () => {
       });
     });
   });
-});
+};

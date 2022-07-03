@@ -1,60 +1,71 @@
 const axios = require('axios');
-const { expect } = require('chai');
 const { StatusCodes } = require('http-status-codes');
+const { expect, assert } = require('chai');
 
-const path = 'https://api.github.com/user/following';
-const token = process.env.ACCESS_TOKEN;
+describe('Given a user github logged', () => {
+  const urlBase = 'https://api.github.com';
+  const username = 'aperdomob';
 
-let response;
-let followingList;
-let userFind;
+  describe('when wanna follow a user', () => {
+    let followQueryResponse;
 
-const instance = axios.create({
-  baseURL: path,
-  headers: { Authorization: `token ${token}` }
-});
-
-describe('PUT methods', () => {
-  before(async () => {
-    response = await instance.put(`${path}/aperdomob`);
-  });
-
-  it('Follow a user service', () => {
-    expect(response.status).to.equal(StatusCodes.NO_CONTENT);
-    expect(response.data).to.equal('');
-  });
-
-  describe('Verify following List', () => {
     before(async () => {
-      followingList = await instance.get(`${path}`);
-      userFind = followingList.data.find(({ login }) => login === 'aperdomob');
+      followQueryResponse = await axios.put(`${urlBase}/user/following/${username}`, {}, {
+        headers: {
+          Authorization: `token ${process.env.ACCESS_TOKEN}`
+        }
+      });
     });
 
-    it('Method to get list of followed', () => {
-      expect(followingList.status).to.equal(StatusCodes.OK);
-      expect(userFind.login).to.equal('aperdomob');
-    });
-  });
-
-  describe('Verify the idempotence of the method', () => {
-    before(async () => {
-      response = await instance.put(`${path}/aperdomob`);
+    it('then should be a response', () => {
+      expect(followQueryResponse.status).to.eql(StatusCodes.NO_CONTENT);
+      expect(followQueryResponse.data).to.eql('');
     });
 
-    it('follow a user a second time', () => {
-      expect(response.status).to.equal(StatusCodes.NO_CONTENT);
-      expect(response.data).to.equal('');
-    });
+    describe('when wanna know who follow', () => {
+      let user;
 
-    describe('Verify that continued to follow the user', () => {
       before(async () => {
-        followingList = await instance.get(`${path}`);
-        userFind = followingList.data.find(({ login }) => login === 'aperdomob');
+        const response = await axios.get(`${urlBase}/user/following`, {
+          headers: {
+            Authorization: `token ${process.env.ACCESS_TOKEN}`
+          }
+        });
+        user = response.data.find((list) => list.login === username);
       });
 
-      it('Verify that follow the indicated user', () => {
-        expect(followingList.status).to.equal(StatusCodes.OK);
-        expect(userFind.login).to.equal('aperdomob');
+      it(`then should be followed to ${username}`, () => assert.exists(user));
+    });
+
+    describe('when wanna follow a user again', () => {
+      let followUserAgainQueryResponse;
+
+      before(async () => {
+        followUserAgainQueryResponse = await axios.put(`${urlBase}/user/following/${username}`, {}, {
+          headers: {
+            Authorization: `token ${process.env.ACCESS_TOKEN}`
+          }
+        });
+      });
+
+      it('then verify the method is idempotent', () => {
+        expect(followUserAgainQueryResponse.status).to.eql(StatusCodes.NO_CONTENT);
+        expect(followUserAgainQueryResponse.data).to.eql('');
+      });
+
+      describe('when wanna know who follow', () => {
+        let user;
+
+        before(async () => {
+          const userFollowQuery = await axios.get(`${urlBase}/user/following`, {
+            headers: {
+              Authorization: `token ${process.env.ACCESS_TOKEN}`
+            }
+          });
+          user = userFollowQuery.data.find((list) => list.login === username);
+        });
+
+        it(`then should be followed to ${username}`, () => assert.exists(user));
       });
     });
   });
