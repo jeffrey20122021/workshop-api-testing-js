@@ -28,7 +28,7 @@ describe('Testing 4', () => {
       expect(issue.data.title).to.equal('Issue');
       expect(issue.data.body).to.equal(null);
     });
-    it('PATCH issue , async () => {
+    it('PATCH issue', async () => {
       const user = await object.get('https://api.github.com/user');
       const repos = await object.get(user.data.repos_url);
       const repo = repos.data[0];
