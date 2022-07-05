@@ -16,4 +16,8 @@ describe('idempotence', () => {
     const response = await object.get('https://api.github.com/user/following');
     expect(response.data.find((user) => user.login === 'aperdomob')).to.not.eql(undefined);
   });
+  it('refollowing test', async () => {
+    const response = await object.get('https://api.github.com/user/following');
+    expect(response.data.find((user) => user.login === 'aperdomob')).to.not.eql(undefined);
+  });
 });
