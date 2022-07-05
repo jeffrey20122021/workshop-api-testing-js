@@ -1,4 +1,3 @@
-const { StatusCodes } = require('http-status-codes');
 const { expect } = require('chai');
 const chaiSubset = require('chai-subset');
 const chai = require('chai');
@@ -6,7 +5,6 @@ const md5 = require('md5');
 
 chai.use(chaiSubset);
 const axios = require('axios');
-
 
 describe('Github Api Test', () => {
   describe('testing GET method', () => {
