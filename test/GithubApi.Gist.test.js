@@ -3,6 +3,8 @@ const axios = require('axios');
 const chaiSubset = require('chai-subset');
 const chai = require('chai');
 
+const gist = 'gist';
+
 chai.use(chaiSubset);
 
 const object = axios.create({
