@@ -3,7 +3,15 @@ const axios = require('axios');
 const chaiSubset = require('chai-subset');
 const chai = require('chai');
 
-const gist = 'gist';
+const body = {
+  description: 'Promise #1',
+  public: true,
+  files: {
+    'Readme.md': {
+      content: 'Promise #1'
+    }
+  }
+};
 
 chai.use(chaiSubset);
 
@@ -16,9 +24,9 @@ const object = axios.create({
 describe('Github Delete Testing', () => {
   describe('Delete M', async () => {
     it('Create', async () => {
-      const gist = await object.post('https://api.github.com/gists', { description: 'Promise #1', public: true, files: { 'README.md': { content: 'Promise #1' } } });
+      const gist = await object.post('https://api.github.com/gists', body);
       expect(gist.status).to.equal(201);
-      expect(gist.data).to.containSubset({ description: 'Promise #1', public: true, files: { 'README.md': { content: 'Promise #1' } } });
+      expect(gist.data).to.containSubset(body);
     });
 
     it('Gist', async () => {
