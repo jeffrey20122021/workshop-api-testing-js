@@ -1,5 +1,5 @@
 const listPublicEventsSchema = {
-    type: 'array',
+  type: 'array',
   items: {
     type: 'object',
     properties: {
