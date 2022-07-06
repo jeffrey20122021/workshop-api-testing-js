@@ -20,6 +20,6 @@ describe('Test', () => {
       const response = await object.get('https://github.com/aperdomob/redirect-test');
       expect(response.data).to.contains('href="https://github.com/aperdomob/new-redirect-test"');
       expect(response.request.path).to.equal('/aperdomob/new-redirect-test');
-    })
+    });
   });
 });
