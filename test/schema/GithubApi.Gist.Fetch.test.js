@@ -28,12 +28,10 @@ describe('Github Delete Testing with fetch', () => {
       expect(gist.status).to.equal(201);
       expect(gist.data).to.containSubset(body);
     });
-
     it('Gist', async () => {
       const gist = await fetch.get('https://api.github.com/gists');
       expect(gist.data.find((actualGist) => actualGist.description === 'Promise #1')).to.not.equal(undefined);
     });
-
     it('Delete', async () => {
       const gists = await fetch.get('https://api.github.com/gists');
 
