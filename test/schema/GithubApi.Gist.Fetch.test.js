@@ -15,7 +15,7 @@ const body = {
 
 chai.use(chaiSubset);
 
-const object = axios.create({
+const fetch = axios.create({
   headers: {
     Authorization: `token ${process.env.ACCESS_TOKEN}`
   }
