@@ -1,4 +1,3 @@
-const { StatusCodes } = require('http-status-codes');
 const { expect } = require('chai');
 const chaiSubset = require('chai-subset');
 const chai = require('chai');
@@ -8,25 +7,6 @@ chai.use(chaiSubset);
 const axios = require('axios');
 
 describe('Github Api Test', () => {
-  describe('Authentication', () => {
-    it('Via OAuth2 Tokens by Header', async () => {
-      const response = await axios.get('https://api.github.com/users/aperdomob', {
-        headers: {
-          Authorization: `token ${process.env.ACCESS_TOKEN}`
-        }
-      });
-      expect(response.status).to.equal(StatusCodes.OK);
-    });
-    it('Via OAuth2 Tokens by parameter', async () => {
-      const response = await axios.get(
-        'https://api.github.com/users/aperdomob',
-        { access_token: process.env.ACCESS_TOKEN }
-      );
-      expect(response.status).to.equal(StatusCodes.OK);
-    });
-  });
-});
-describe('Github Api Test 2', () => {
   describe('testing GET method', () => {
     it('basic features test', async () => {
       const response = await axios.get('https://api.github.com/users/aperdomob');
