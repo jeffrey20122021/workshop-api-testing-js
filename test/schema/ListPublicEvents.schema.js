@@ -26,13 +26,13 @@ const listPublicEventsSchema = {
       },
       payload: {
         type: 'object',
-            patternProperties: {
-              push_id: {
-                type: 'integer',
-                required: false
-              },
-      }
-    },
+        patternProperties: {
+          push_id: {
+            type: 'integer',
+            required: false
+          }
+        }
+      },
       public: { type: 'boolean' },
       created_at: { type: 'string' }
     }
