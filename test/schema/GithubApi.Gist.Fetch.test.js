@@ -1,7 +1,9 @@
 const { expect } = require('chai');
-const axios = require('axios');
+require('isomorphic-fetch');
 const chaiSubset = require('chai-subset');
 const chai = require('chai');
+
+chai.use(chaiSubset);
 
 const body = {
   description: 'Promise #1',
@@ -12,14 +14,6 @@ const body = {
     }
   }
 };
-
-chai.use(chaiSubset);
-
-const fetch = axios.create({
-  headers: {
-    Authorization: `token ${process.env.ACCESS_TOKEN}`
-  }
-});
 
 describe('Github Delete Testing with fetch', () => {
   describe('Delete M', async () => {
