@@ -31,8 +31,11 @@ const listPublicEventsSchema = {
                 type: 'integer',
                 required: false
               },
-      }},
+      }};
       public: { type: 'boolean' },
       created_at: { type: 'string' }
+    }
+  }
+};
 
 exports.listPublicEventsSchema = listPublicEventsSchema;
